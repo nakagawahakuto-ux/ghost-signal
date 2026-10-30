@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#060b15" />
+<title>GHOST SIGNAL — 追跡する知能から逃げろ</title>
+<style>
+:root{color-scheme:dark;--bg:#060a12;--panel:#101a27;--line:#223449;--muted:#8798ae;--white:#eaf5ff;--cyan:#56e8fa;--hot:#ff697a;--gold:#ffd87a;--green:#91fac4}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-height:100vh;color:var(--white);font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;letter-spacing:.025em;overflow-x:hidden}
+body:before{position:fixed;inset:0;content:"";pointer-events:none;background:radial-gradient(ellipse at 20% -20%,#17445e66,transparent 60%),radial-gradient(ellipse at 90% 95%,#65263534,transparent 55%);z-index:-1}
+.container{max-width:1150px;margin:0 auto;padding:24px 18px 65px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:19px}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.24em;color:var(--cyan);text-transform:uppercase}
+h1{font-size:clamp(31px,5vw,53px);letter-spacing:.06em;line-height:1;margin:8px 0 9px;font-weight:850}
+h1 span{color:var(--cyan);text-shadow:0 0 30px #42e6f864}
+.sub{font-size:12px;color:var(--muted);margin:0;line-height:1.7}
+.pill{display:flex;align-items:center;gap:7px;background:#142234;border:1px solid #29425b;border-radius:100px;color:#bdd7ed;font-size:11px;padding:10px 12px;font-weight:650}
+.dot{height:7px;width:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);display:inline-block}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:15px;align-items:start}
+.panel{background:linear-gradient(155deg,#101c2c,#0a111f);border:1px solid #26384b;border-radius:15px;box-shadow:0 20px 70px #0005;overflow:hidden}
+.game-toolbar{padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tag{font-weight:700;font-size:10px;color:var(--muted);letter-spacing:.16em}
+.stat-row{display:flex;gap:15px}.stat{min-width:51px;text-align:right}.stat b{font-size:18px;color:var(--white);display:block;font-variant-numeric:tabular-nums}.stat small{font-size:9px;color:var(--muted)}
+.canvas-wrap{padding:12px;position:relative;touch-action:pan-y;user-select:none}.canvas-shell{position:relative;line-height:0;max-width:100%}
+#board{width:100%;height:auto;aspect-ratio:19 / 15;display:block;touch-action:none;background:#080f1a;border:1px solid #263a4b;border-radius:7px;cursor:crosshair}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#030a14d9;z-index:5;padding:18px;backdrop-filter:blur(5px)}
+.overlay.hidden{display:none}.modal{width:min(100%,430px);text-align:center;line-height:1.65}.modal-symbol{font-size:38px;color:var(--cyan);text-shadow:0 0 30px #65edff90;margin-bottom:6px}.modal h2{font-size:25px;line-height:1.3;margin:0 0 12px}.modal p{font-size:13px;color:#b6c8d9;margin:0 auto 17px;max-width:330px}.modal .chips{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:23px}.chip{font-size:10px;border:1px solid #3a5368;background:#142437;color:#c4e9fa;padding:5px 8px;border-radius:100px}
+button{font:inherit;border:1px solid #344a5f;border-radius:9px;cursor:pointer;color:#d6eafa;background:#1a2a3b;transition:filter .15s,transform .06s}button:active{transform:scale(.97)}button:disabled{opacity:.42;cursor:not-allowed}
+.primary{background:linear-gradient(110deg,#50e5f5,#70f9dc);border:0;padding:13px 23px;color:#06232b;font-size:14px;font-weight:900;box-shadow:0 8px 30px #16e8ec4b}.primary:hover{filter:brightness(1.05)}
+.tool-row{border-top:1px solid var(--line);display:flex;gap:9px;flex-wrap:wrap;align-items:center;padding:12px}.tool{padding:10px 12px;font-size:11px;font-weight:800;flex:1;white-space:nowrap}.tool.active{background:#185057;border-color:#49e9ed;color:#98fff1;box-shadow:inset 0 0 15px #25eec11a}.tool.red.active{background:#4b2736;border-color:#ff7186;color:#ffb9c3}.tool strong{color:var(--gold)}
+.side{display:flex;flex-direction:column;gap:12px}.side .section{padding:16px}.section h3{font-size:11px;letter-spacing:.16em;color:#a0c0d7;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between}.section h3 em{font-style:normal;color:var(--cyan)}
+.metric{display:flex;align-items:end;justify-content:space-between;gap:8px;margin-bottom:10px}.metric big{font-weight:850;font-size:37px;line-height:1;color:var(--cyan)}.metric small{font-size:11px;color:var(--muted);line-height:1.5;text-align:right}
+.meter{height:6px;border-radius:10px;overflow:hidden;background:#1f3246;margin-bottom:10px}.meter>div{height:100%;background:linear-gradient(90deg,#35bdcf,#eecf79);width:75%;transition:width .25s}
+.explain{font-size:11px;color:#96b3c7;line-height:1.7;margin:0}.signal{display:grid;grid-template-columns:10px 1fr;gap:9px;align-items:center;padding-top:12px;border-top:1px solid var(--line);margin-top:13px;font-size:11px;color:#bed4e4}
+.signal .s-dot{height:9px;width:9px;border-radius:2px;background:var(--gold);box-shadow:0 0 9px #ffd87a88}.signal .s-dot.off{background:#435d76;box-shadow:none}
+.events{height:132px;overflow:hidden;display:flex;flex-direction:column;gap:9px}.event{font-size:11px;line-height:1.5;color:#a6bdd0;display:flex;gap:8px}.event .t{font-variant-numeric:tabular-nums;color:#557a93;white-space:nowrap}.event.hot{color:#ffa0ad}.event.good{color:#a5ffdb}
+.instructions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.how{border:1px solid #243c50;background:#0c1928;border-radius:9px;padding:9px 11px;font-size:11px;color:#b6cede;line-height:1.5}.how strong{display:block;color:#e1f6ff;font-size:12px;margin-bottom:4px}
+.controls{display:flex;gap:13px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 1px}.pad{display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,39px);gap:5px}.pad button{font-weight:900;font-size:17px;background:#17283a;border:1px solid #3b5367;touch-action:manipulation}.pad button:nth-child(1){grid-column:2;grid-row:1}.pad button:nth-child(2){grid-column:1;grid-row:2}.pad button:nth-child(3){grid-column:2;grid-row:2}.pad button:nth-child(4){grid-column:3;grid-row:2}.legend{display:flex;gap:8px 13px;flex-wrap:wrap;font-size:10px;color:#97acbf;max-width:330px}.legend span{white-space:nowrap}.legend b{margin-right:4px}.cy{color:var(--cyan)}.re{color:var(--hot)}.go{color:var(--gold)}.gr{color:var(--green)}
+.controls-mobile{display:none}.bottom{margin-top:16px;font-size:11px;line-height:1.8;color:#7792a5}.bottom strong{color:#b4d6e7}
+#replayPanel{display:none}.replay-scale{display:flex;justify-content:space-between;font-size:11px;color:#aac2d4;margin:10px 0}.replay-range{width:100%;accent-color:#5ce9ee;cursor:pointer}#chart{width:100%;height:82px;display:block;background:#0a1724;border-radius:6px;border:1px solid #274256}
+@media(max-width:800px){.controls-mobile{display:flex;padding:11px 15px;border-top:1px solid var(--line);margin:0}.controls{display:none}.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:12px}.side .section{padding:13px}.container{padding:17px 12px 70px}.header{margin-bottom:14px}.instructions{grid-template-columns:1fr}.game-toolbar{padding:11px 13px}.stat-row{gap:12px}}
+@media(max-width:510px){.side{display:flex}.side .section{padding:14px}.controls{padding:9px 0 0}.legend{max-width:195px;gap:9px}.canvas-wrap{padding:6px}.tool-row{padding:9px 7px;gap:6px}.tool{padding:11px 5px;font-size:10px}.modal h2{font-size:23px}h1{font-size:34px}.pill{font-size:9px;padding:7px 9px}.stat b{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <div><div class="eyebrow">A playable intelligence experiment · v1.0</div><h1>GHOST <span>SIGNAL</span></h1><p class="sub">追跡者は、あなたの居場所を知らない。それでも、考えて追ってくる。</p></div>
+    <div class="pill"><span class="dot"></span> OFFLINE · AI INFERENCE ENGINE</div>
+  </header>
+  <main class="layout">
+   <section class="panel">
+    <div class="game-toolbar">
+      <span class="tag" id="phase">01 / INFILTRATION</span>
+      <div class="stat-row"><div class="stat"><b id="turnText">00</b><small>TURN</small></div><div class="stat"><b id="coresText">0 / 3</b><small>CORES</small></div><div class="stat"><b id="hpText">♥ ♥</b><small>SHIELDS</small></div></div>
+    </div>
+    <div class="canvas-wrap"><div class="canvas-shell">
+      <canvas width="950" height="750" id="board" aria-label="迷路ゲーム盤面"></canvas>
+      <div class="overlay" id="overlay"><div class="modal">
+       <div class="modal-symbol" id="modalSymbol">◎</div><h2 id="modalTitle">見えない知能から逃げろ。</h2>
+       <p id="modalText">迷宮から3つの記憶コアを回収して脱出。追跡AIは、音の届き方と目撃情報をもとに、あなたの居場所を確率で推理する。</p>
+       <div class="chips"><span class="chip">毎回変わる迷宮</span><span class="chip">ベイズ推理</span><span class="chip">行動のリプレイ</span></div>
+       <button class="primary" id="startBtn">潜入を開始する →</button>
+      </div></div>
+    </div></div>
+    <div class="tool-row">
+      <button class="tool" id="sneakBtn" title="オンにすると次の移動で音を出さない。合計5歩。">◌ 忍び足 <strong>5</strong></button>
+      <button class="tool red" id="decoyBtn" title="選択して盤面の7マス以内をタップ。そこに偽の音を出す。">⌁ デコイ <strong>2</strong></button>
+      <button class="tool" id="heatBtn">◉ AIの予測を表示</button>
+      <button class="tool" id="soundBtn">♫ 音 ON</button>
+    </div>
+    <div class="controls controls-mobile"><div class="pad"><button data-move="0,-1" aria-label="上">↑</button><button data-move="-1,0" aria-label="左">←</button><button data-move="0,1" aria-label="下">↓</button><button data-move="1,0" aria-label="右">→</button></div>
+    <div class="legend"><span><b class="cy">●</b>プレイヤー</span><span><b class="re">●</b>敵</span><span><b class="go">◆</b>コア</span><span><b class="gr">▣</b>出口</span><span><b>◉</b>確率ヒートマップ</span></div></div>
+   </section>
+   <aside class="side">
+    <section class="panel section"><h3>TRACKER / 推理エンジン <em>LIVE</em></h3>
+      <div class="metric"><big id="uncertainty">--</big><small>敵が考える<br>実効候補地点数</small></div>
+      <div class="meter"><div id="meterFill"></div></div>
+      <p class="explain" id="hypothesis">音が聞こえると、位置の確率分布が変化します。忍び足なら情報が増えません。</p>
+      <div class="signal"><div class="s-dot off" id="signalDot"></div><span id="signalText">最新の手がかり：なし</span></div>
+    </section>
+    <section class="panel section"><h3>EVENT LOG <em id="eventCount">00</em></h3><div class="events" id="events"></div></section>
+    <section class="panel section" id="replayPanel"><h3>AFTER ACTION / 思考の記録 <em>REPLAY</em></h3>
+      <p class="explain">スライダーを動かすと、その瞬間に敵が信じていた位置を再生します。色の濃い場所ほど確率が高い。</p>
+      <div class="replay-scale"><span id="replayLabel">TURN 0</span><span id="replayCount">0 / 0</span></div>
+      <input class="replay-range" id="replay" type="range" min="0" max="0" value="0" />
+      <canvas id="chart" width="500" height="100"></canvas>
+      <p class="explain" style="margin-top:9px">推理の確信度の推移。上ほど「居場所を絞れていない」。</p>
+      <button class="tool" id="restartBtn" style="width:100%;margin-top:12px">↺ 新しい迷宮で再挑戦</button>
+    </section>
+    <section class="panel section"><h3>FIELD MANUAL</h3><div class="instructions">
+      <div class="how"><strong><span class="cy">●</span> あなた / <span class="re">●</span> 追跡者</strong>矢印キー・画面タップ・下の方向キーで移動。</div>
+      <div class="how"><strong><span class="go">◆</span> コア / <span class="gr">▣</span> 脱出口</strong>3つ集めて、出口へ向かう。2回捕まると終了。</div>
+      <div class="how"><strong>◌ 忍び足</strong>5歩だけ、足音の手がかりを消せる。</div>
+      <div class="how"><strong>⌁ デコイ</strong>押してから盤面をタップ。偽の音を発生させる。</div>
+     </div></section>
+   </aside>
+  </main>
+  <div class="controls"><div class="pad"><button data-move="0,-1" aria-label="上">↑</button><button data-move="-1,0" aria-label="左">←</button><button data-move="0,1" aria-label="下">↓</button><button data-move="1,0" aria-label="右">→</button></div>
+   <div class="legend"><span><b class="cy">●</b>プレイヤー</span><span><b class="re">●</b>敵</span><span><b class="go">◆</b>コア</span><span><b class="gr">▣</b>出口</span><span><b>◉</b>確率ヒートマップ</span></div></div>
+  <p class="bottom"><strong>WHAT MAKES IT INTELLIGENT?</strong> 敵の行き先は、実際のあなたの座標ではなく、毎ターン更新される確率分布から決めています。音は位置に誤差を含む観測、目撃は確実な観測として処理します。マップの壁を考慮した経路探索、デコイによる欺瞞、推理の履歴まで、すべてこのHTMLの中で実行。クラウド通信も外部ライブラリも不要です。</p>
+</div>
+<script>
+(()=>{'use strict';
+const W=19,H=15,N=W*H, TW=50,TH=50; const $=id=>document.getElementById(id);
+const canvas=$('board'),cx=canvas.getContext('2d'); const range=$('replay'),chart=$('chart'),cc=chart.getContext('2d');
+const DIR=[[1,0],[-1,0],[0,1],[0,-1]];
+let floor=[],adj=[],cells=[],distanceCache=new Map(),player=0,guard=0,guardStart=0,start=0,exit=0,cores=[],remaining=new Set(),belief=[],turn=0,hp=2,stealth=5,decoys=2,sneak=false,aim=false,heat=false,muted=false,started=false,ended=false,history=[],messages=[],obs=null,replayIdx=null,alertTick=0,tones=null;
+const id=(x,y)=>y*W+x,pos=i=>[i%W,Math.floor(i/W)],rand=a=>Math.floor(Math.random()*a),fmt=n=>String(n).padStart(2,'0');
+function neighbors(i){const [x,y]=pos(i);return DIR.map(([dx,dy])=>[x+dx,y+dy]).filter(([xx,yy])=>xx>=0&&yy>=0&&xx<W&&yy<H).map(([xx,yy])=>id(xx,yy));}
+function distances(from){if(distanceCache.has(from))return distanceCache.get(from);let d=new Int16Array(N).fill(-1),q=[from],head=0;d[from]=0;while(head<q.length){let v=q[head++];for(let u of adj[v])if(d[u]<0){d[u]=d[v]+1;q.push(u)}}distanceCache.set(from,d);return d}
+function far(from,exclude=new Set()){let d=distances(from),best=-1,s=-1;for(let i of cells){if(!exclude.has(i)&&d[i]>s){s=d[i];best=i}}return best}
+function makeMap(){distanceCache.clear();floor=Array(N).fill(false);const xy=(x,y)=>id(x,y);let stack=[[1,1]];floor[xy(1,1)]=true;
+while(stack.length){let [x,y]=stack[stack.length-1];let opts=DIR.map(([dx,dy])=>[x+dx*2,y+dy*2,dx,dy]).filter(([a,b])=>a>0&&a<W-1&&b>0&&b<H-1&&!floor[xy(a,b)]);if(!opts.length){stack.pop();continue}let [nx,ny,dx,dy]=opts[rand(opts.length)];floor[xy(x+dx,y+dy)]=true;floor[xy(nx,ny)]=true;stack.push([nx,ny])}
+// Extra passage connections create loops and tactical choices, keeping outer walls sealed.
+for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){let k=xy(x,y);if(!floor[k]&&Math.random()<.20){let nb=neighbors(k).filter(j=>floor[j]);if(nb.length>=2)floor[k]=true}}
+// Tiny chambers provide breathing room without breaking connectivity.
+for(let r=0;r<4;r++){let x=1+2*rand((W-3)/2),y=1+2*rand((H-3)/2);for(let yy=y;yy<=Math.min(y+2,H-2);yy++)for(let xx=x;xx<=Math.min(x+2,W-2);xx++)floor[xy(xx,yy)]=true}
+cells=[];adj=Array.from({length:N},()=>[]);for(let i=0;i<N;i++)if(floor[i])cells.push(i);for(let i of cells)adj[i]=neighbors(i).filter(j=>floor[j]);start=id(1,1);exit=far(start);let used=new Set([start,exit]);cores=[];
+for(let k=0;k<3;k++){let best=-1,bscore=-1;for(let i of cells){if(used.has(i))continue;let ds=[start,exit,...cores].map(j=>distances(j)[i]),min=Math.min(...ds),score=min*10+distances(start)[i]*.16+Math.random()*5;if(min>=3&&score>bscore){best=i;bscore=score}}if(best<0)best=far(start,used);cores.push(best);used.add(best)}
+const x=distances(start);guardStart=cells.filter(i=>x[i]>Math.max(11,x[exit]*.50)&&!used.has(i)).sort((a,b)=>Math.abs(x[a]-x[exit]*.72)-Math.abs(x[b]-x[exit]*.72))[0]||far(start,used);resetRound()}
+function resetRound(){player=start;guard=guardStart;remaining=new Set(cores);turn=0;hp=2;stealth=5;decoys=2;sneak=false;aim=false;heat=false;obs=null;replayIdx=null;alertTick=0;started=false;ended=false;history=[];messages=[];const p=1/cells.length;belief=Array(N).fill(0);for(let i of cells)belief[i]=p;record('INIT');log('潜入地点を確保。出口はロックされています。');$('replayPanel').style.display='none';$('overlay').classList.remove('hidden');$('modalSymbol').textContent='◎';$('modalTitle').textContent='見えない知能から逃げろ。';$('modalText').textContent='3つの記憶コアを回収して脱出。敵は、音と目撃情報から確率であなたの位置を推理します。';$('startBtn').textContent='潜入を開始する →';$('phase').textContent='01 / INFILTRATION';refresh()}
+function log(s,type=''){messages.unshift({t:turn,s,type});messages=messages.slice(0,5);$('events').innerHTML=messages.map(x=>`<div class="event ${x.type}"><span class="t">${fmt(x.t)}</span><span>${x.s}</span></div>`).join('');$('eventCount').textContent=fmt(turn)}
+function updateBelief(){let next=Array(N).fill(0);for(let i of cells){let p=belief[i];next[i]+=p*.22;let nb=adj[i];for(let j of nb)next[j]+=p*.78/Math.max(1,nb.length)}belief=next;normalize()}
+function normalize(){let sum=0;for(let i of cells)sum+=belief[i];if(sum<=0){for(let i of cells)belief[i]=1/cells.length;return}for(let i of cells)belief[i]/=sum}
+function gaussian(){const u=Math.max(1e-10,Math.random()),v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function soundObservation(target,fake=false){let [x,y]=pos(target),sigma=fake?1.6:2.8;let ox=Math.min(W-1,Math.max(0,x+gaussian()*sigma)),oy=Math.min(H-1,Math.max(0,y+gaussian()*sigma));obs={x:ox,y:oy,fake,kind:fake?'偽の音':'足音'};let probSigma=fake?2:3.5;for(let i of cells){let [a,b]=pos(i),d=(a-ox)**2+(b-oy)**2;belief[i]*=.012+Math.exp(-d/(2*probSigma**2))}normalize()}
+function sees(a,b){const [x,y]=pos(a),[tx,ty]=pos(b);if(Math.abs(x-tx)+Math.abs(y-ty)>5)return false;if(x!==tx&&y!==ty)return false;const dx=Math.sign(tx-x),dy=Math.sign(ty-y);let xx=x,yy=y;while(xx!==tx||yy!==ty){xx+=dx;yy+=dy;if(!floor[id(xx,yy)])return false}return true}
+function lineSight(){return sees(guard,player)}
+function bestTarget(){// Find an area of high posterior probability, not the true position.
+ let dist=distances(guard),best=guard,high=-1;
+ for(let i of cells){let around=0,[x,y]=pos(i);for(let j of cells){let [a,b]=pos(j),d=Math.abs(a-x)+Math.abs(b-y);if(d<=3)around+=belief[j]*(4-d)/4}
+ let score=around/(1+Math.max(0,dist[i])*.023);if(score>high){best=i;high=score}}
+ return best}
+function guardStep(){let target=bestTarget(),d=distances(target),choices=adj[guard];if(choices.length){let lowest=Math.min(...choices.map(i=>d[i]<0?9999:d[i]));let move=choices.filter(i=>d[i]===lowest);if(d[guard]>lowest&&move.length)guard=move[rand(move.length)]}
+ // Catch if same cell. The guard can only see along unblocked corridors.
+ if(guard===player){hp--;alertTick=1;beep('caught');if(hp<=0){finish(false);return}log('追跡者に発見された！ シールド残り1。','hot');guard=guardStart;soundObservation(player,false)}
+}
+function record(action){let entropy=0;for(let i of cells)if(belief[i]>0)entropy-=belief[i]*Math.log(belief[i]);history.push({player,guard,belief:belief.slice(),obs:obs?{...obs}:null,turn,hp,cores:[...remaining],action,unc:Math.exp(entropy)});if(history.length>151)history.shift()}
+function nextTurn(signal,action){if(!started||ended)return;turn++;updateBelief();obs=null;
+ let seen=lineSight();if(seen){belief.fill(0);belief[player]=1;obs={x:pos(player)[0],y:pos(player)[1],kind:'直接目撃',seen:true};alertTick=1;log('敵の視界に入った。位置を特定された！','hot');beep('alert')}
+ else if(signal&&signal.kind==='decoy'){soundObservation(signal.target,true);log('偽の音を放出。追跡者が反応。','good');beep('decoy')}
+ else if(signal&&signal.kind==='step'){if(Math.random()<.89){soundObservation(player,false);log('足音が観測された。推定座標には誤差あり。')}else log('足音は届かなかった。','good')}
+ else log('音なし。敵の予測が拡散。','good');
+ guardStep();record(action);refresh();if(turn>=100&&!ended){finish(false,'長時間の潜入で警報が作動しました。')} }
+function move(dx,dy){if(!started||ended||replayIdx!==null)return;const [x,y]=pos(player),nx=x+dx,ny=y+dy;if(nx<0||nx>=W||ny<0||ny>=H)return;let k=id(nx,ny);if(!floor[k]){beep('wall');return}aim=false;player=k;beep('step');let quiet=sneak&&stealth>0;if(quiet){stealth--;if(stealth===0)sneak=false}
+ if(remaining.has(player)){remaining.delete(player);beep('core');log(`記憶コア回収！ 残り${remaining.size}個。`,'good');if(!remaining.size)log('脱出口がアンロックされた。','good')}
+ if(player===exit&&!remaining.size){turn++;record('EXIT');finish(true);return}
+ if(guard===player){hp--;beep('caught');if(hp<=0){turn++;record('COLLISION');finish(false);return}log('敵との接触！ シールド損傷。','hot');guard=guardStart}
+ nextTurn(quiet?null:{kind:'step'},quiet?'STEALTH':'MOVE')}
+function deploy(i){if(!started||ended||decoys<=0)return;let [x,y]=pos(i),[px,py]=pos(player);if(!floor[i]||Math.abs(x-px)+Math.abs(y-py)>7||i===player){log('デコイは7マス以内の通路に設置できます。','hot');beep('wall');return}decoys--;aim=false;nextTurn({kind:'decoy',target:i},'DECOY')}
+function entropyOf(b){let e=0;for(let i of cells)if(b[i]>0)e-=b[i]*Math.log(b[i]);return Math.exp(e)}
+function refresh(){let r=replayIdx===null?{player,guard,belief,turn,hp,cores:[...remaining],obs}:history[replayIdx];$('turnText').textContent=fmt(r.turn);$('coresText').textContent=`${3-r.cores.length} / 3`;$('hpText').textContent='♥ '.repeat(r.hp).trim()||'—';let uncertainty=entropyOf(r.belief);$('uncertainty').textContent=String(Math.round(uncertainty));$('meterFill').style.width=`${Math.max(1,Math.min(100,(uncertainty/cells.length)*100))}%`;let peak=0,p=-1;for(let i of cells)if(r.belief[i]>p){p=r.belief[i];peak=i}let [px,py]=pos(peak);
+$('hypothesis').textContent=`現在の最有力候補は ${px+1}列・${py+1}行（確率 ${Math.round(p*1000)/10}%）。敵は地形を考慮して、この分布から次の行動を決めます。`;
+$('signalDot').className='s-dot'+(!r.obs?' off':'');$('signalText').textContent=r.obs?r.obs.kind+` @ ${Math.round(r.obs.x+1)},${Math.round(r.obs.y+1)}`:'最新の手がかり：なし';
+$('sneakBtn').innerHTML=`◌ 忍び足 <strong>${stealth}</strong>`;$('decoyBtn').innerHTML=`⌁ デコイ <strong>${decoys}</strong>`;$('sneakBtn').classList.toggle('active',sneak);$('decoyBtn').classList.toggle('active',aim);$('sneakBtn').disabled=ended||!started||stealth===0;$('decoyBtn').disabled=ended||!started||decoys===0;$('heatBtn').classList.toggle('active',heat);$('heatBtn').textContent=heat?'◉ 予測を隠す':'◉ AIの予測を表示';$('soundBtn').textContent='♫ 音 '+(muted?'OFF':'ON');if(ended)drawChart();}
+function finish(win,reason){if(ended)return;ended=true;aim=false;sneak=false;heat=true;replayIdx=null;record(win?'WIN':'LOSE');$('replayPanel').style.display='block';range.max=String(history.length-1);range.value=String(history.length-1);$('replayLabel').textContent=`TURN ${turn}`;$('replayCount').textContent=`${history.length-1} / ${history.length-1}`;$('phase').textContent=win?'MISSION COMPLETE':'SIGNAL LOST';$('overlay').classList.remove('hidden');$('modalSymbol').textContent=win?'✧':'⌁';$('modalTitle').textContent=win?'脱出成功。予測を出し抜いた。':'追跡者に捕まった。';$('modalText').textContent=(reason|| (win?'3つのコアを回収して帰還しました。':'シールドを失いました。'))+' 右の「思考の記録」で、敵が各ターンにどこにいると思っていたかを再生できます。';$('startBtn').textContent='分析を表示する →';log(win?'MISSION COMPLETE / 生還。':'SIGNAL LOST / 作戦失敗。',win?'good':'hot');beep(win?'win':'lose');refresh();}
+function drawChart(){let w=chart.width,h=chart.height;cc.clearRect(0,0,w,h);cc.strokeStyle='#274052';cc.lineWidth=1;for(let r=1;r<=3;r++){let y=h*r/4;cc.beginPath();cc.moveTo(0,y);cc.lineTo(w,y);cc.stroke()}let max=Math.max(...history.map(x=>x.unc),1);cc.beginPath();cc.strokeStyle='#5cf0f0';cc.lineWidth=2.7;history.forEach((p,i)=>{let x=14+i/Math.max(1,history.length-1)*(w-28),y=h-10-(p.unc/max)*(h-22);if(i===0)cc.moveTo(x,y);else cc.lineTo(x,y)});cc.stroke();if(replayIdx!==null){let x=14+replayIdx/Math.max(1,history.length-1)*(w-28);cc.strokeStyle='#ffd87a';cc.lineWidth=1;cc.beginPath();cc.moveTo(x,0);cc.lineTo(x,h);cc.stroke()}}
+function draw(t){let snap=replayIdx===null?{player,guard,belief,cores:[...remaining],obs,turn}:history[replayIdx],b=snap.belief;cx.clearRect(0,0,950,750);cx.fillStyle='#070f1a';cx.fillRect(0,0,950,750);const tm=t*.001;
+let maxP=Math.max(...b,1e-9);for(let y=0;y<H;y++)for(let x=0;x<W;x++){let i=id(x,y),xx=x*TW,yy=y*TH;if(!floor[i]){cx.fillStyle='#17293b';cx.fillRect(xx+1,yy+1,48,48);cx.fillStyle='#1d3348';cx.fillRect(xx+2,yy+2,47,3);cx.fillStyle='#0b1624';cx.fillRect(xx+46,yy+3,3,44);continue}cx.fillStyle=(x+y)%2===0?'#091827':'#0b1b2a';cx.fillRect(xx+1,yy+1,48,48);cx.strokeStyle='#1b35436f';cx.lineWidth=1;cx.strokeRect(xx+5,yy+5,40,40);
+if(heat||replayIdx!==null){let v=Math.pow(b[i]/maxP,.48),alpha=Math.min(.80,v*.64);cx.fillStyle=`rgba(255,120,105,${alpha})`;cx.fillRect(xx+2,yy+2,46,46)} }
+let epos=pos(exit),ex=epos[0]*TW+25,ey=epos[1]*TH+25;cx.save();cx.translate(ex,ey);cx.shadowBlur=24;cx.shadowColor=snap.cores.length?'#6c88aa':'#80ffc4';cx.strokeStyle=snap.cores.length?'#59708a':'#81ffc3';cx.lineWidth=4;cx.strokeRect(-16,-16,32,32);cx.fillStyle=snap.cores.length?'#355066':'#63cdb048';cx.fillRect(-10,-10,20,20);cx.restore();
+for(let core of snap.cores){let [x,y]=pos(core),s=10+Math.sin(tm*3+core)*2;cx.save();cx.translate(x*TW+25,y*TH+25);cx.rotate(Math.PI/4);cx.shadowColor='#ffda74';cx.shadowBlur=22;cx.fillStyle='#ffe4a0';cx.fillRect(-s,-s,s*2,s*2);cx.fillStyle='#9e6b23';cx.fillRect(-s/2,-s/2,s,s);cx.restore()}
+function agent(i,col,isGuard){let [x,y]=pos(i),cx0=x*TW+25,cy0=y*TH+25,pulse=Math.sin(tm*4)*2;cx.save();cx.beginPath();cx.arc(cx0,cy0,21+pulse,0,Math.PI*2);cx.fillStyle=isGuard?'#fe536020':'#59eaff18';cx.fill();cx.shadowColor=col;cx.shadowBlur=25;cx.fillStyle=col;cx.beginPath();cx.arc(cx0,cy0,isGuard?12:11,0,Math.PI*2);cx.fill();cx.shadowBlur=0;cx.strokeStyle=isGuard?'#ffb2bc':'#e1ffff';cx.lineWidth=2;cx.beginPath();cx.arc(cx0,cy0,6,0,Math.PI*2);cx.stroke();if(isGuard){cx.strokeStyle='#ff637c50';cx.lineWidth=2;cx.beginPath();cx.arc(cx0,cy0,28,0,Math.PI*2);cx.stroke()}cx.restore()}
+agent(snap.guard,'#ff657a',true);agent(snap.player,'#5be9fb',false);
+if(snap.obs){let sx=snap.obs.x*TW+25,sy=snap.obs.y*TH+25;cx.strokeStyle=snap.obs.fake?'#ffd87a77':'#f8bd8466';cx.lineWidth=3;cx.beginPath();cx.arc(sx,sy,20+Math.sin(tm*3)*4,0,Math.PI*2);cx.stroke();cx.beginPath();cx.arc(sx,sy,5,0,Math.PI*2);cx.stroke()}
+if(aim&&!ended){let [px,py]=pos(player);for(let i of cells){let [x,y]=pos(i);if(i!==player&&Math.abs(x-px)+Math.abs(y-py)<=7){cx.strokeStyle='#ffd77a55';cx.lineWidth=1;cx.strokeRect(x*TW+8,y*TH+8,34,34)}}}
+if(alertTick){alertTick*=.92;if(alertTick<.02)alertTick=0;cx.fillStyle=`rgba(255,78,91,${.13*alertTick})`;cx.fillRect(0,0,950,750)}
+requestAnimationFrame(draw)}
+function beep(which){if(muted)return;try{if(!tones)tones=new(window.AudioContext||window.webkitAudioContext)();let now=tones.currentTime;const play=(frequency,duration,type='sine',vol=.045,delay=0)=>{let osc=tones.createOscillator(),g=tones.createGain();osc.type=type;osc.frequency.setValueAtTime(frequency,now+delay);g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(vol,now+delay+.015);g.gain.exponentialRampToValueAtTime(.0001,now+delay+duration);osc.connect(g);g.connect(tones.destination);osc.start(now+delay);osc.stop(now+delay+duration+.01)};
+if(which==='step')play(180,.055,'triangle',.018);if(which==='wall')play(85,.09,'sawtooth',.016);if(which==='core'){play(600,.18,'sine',.06);play(900,.25,'sine',.04,.1)}if(which==='decoy'){play(340,.1,'square',.025);play(270,.2,'triangle',.028,.11)}if(which==='alert'||which==='caught'){play(125,.3,'sawtooth',.035);play(110,.3,'sawtooth',.028,.14)}if(which==='win'){[440,550,660,880].forEach((f,i)=>play(f,.35,'sine',.05,i*.12))}if(which==='lose'){[300,250,190].forEach((f,i)=>play(f,.4,'triangle',.04,i*.15))}}
+catch(e){/* Audio is optional on unsupported or muted devices. */}}
+$('startBtn').addEventListener('click',()=>{if(ended){$('overlay').classList.add('hidden');replayIdx=history.length-1;range.value=String(replayIdx);refresh();return}started=true;$('overlay').classList.add('hidden');try{if(!tones)tones=new(window.AudioContext||window.webkitAudioContext)();tones.resume()}catch(e){}beep('core');refresh()});
+$('restartBtn').addEventListener('click',makeMap);
+$('heatBtn').addEventListener('click',()=>{heat=!heat;refresh()});$('soundBtn').addEventListener('click',()=>{muted=!muted;refresh()});
+$('sneakBtn').addEventListener('click',()=>{if(stealth>0){sneak=!sneak;aim=false;refresh()}});$('decoyBtn').addEventListener('click',()=>{if(decoys>0){aim=!aim;sneak=false;refresh()}});
+for(let btn of document.querySelectorAll('[data-move]'))btn.addEventListener('click',()=>{let [dx,dy]=btn.dataset.move.split(',').map(Number);move(dx,dy)});
+window.addEventListener('keydown',e=>{let d={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],w:[0,-1],a:[-1,0],s:[0,1],d:[1,0]}[e.key];if(d){e.preventDefault();move(...d)}if(e.key==='Escape'&&aim){aim=false;refresh()}});
+let touch=null;canvas.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY}});canvas.addEventListener('pointerup',e=>{if(!touch||!started||ended)return;let dx=e.clientX-touch.x,dy=e.clientY-touch.y;if(Math.hypot(dx,dy)>25){if(Math.abs(dx)>Math.abs(dy))move(Math.sign(dx),0);else move(0,Math.sign(dy));touch=null;return}let rect=canvas.getBoundingClientRect(),x=Math.floor((e.clientX-rect.left)*W/rect.width),y=Math.floor((e.clientY-rect.top)*H/rect.height);if(x<0||x>=W||y<0||y>=H)return;let k=id(x,y);if(aim){deploy(k)}else{let [px,py]=pos(player);if(Math.abs(x-px)+Math.abs(y-py)===1)move(x-px,y-py)}});
+range.addEventListener('input',()=>{replayIdx=+range.value;heat=true;$('replayLabel').textContent=`TURN ${history[replayIdx].turn}`;$('replayCount').textContent=`${replayIdx} / ${history.length-1}`;refresh()});
+makeMap();requestAnimationFrame(draw);
+window.__GHOST_TEST__={getState:()=>({turn,player,guard,exit,cores:[...remaining],hp,started,ended,floorCount:cells.length,history:history.length,posteriorSum:belief.reduce((a,b)=>a+b,0)}),world:()=>({adj,cores:[...remaining],start,exit,player,guard,turn,hp,ended}),move,deploy,start:()=>{$('startBtn').click()},reset:makeMap,see:lineSight};
+})();
+</script>
+</body></html>
